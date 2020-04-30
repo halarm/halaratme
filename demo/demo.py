@@ -1,7 +1,8 @@
 import re
 import sys
 import copy
-TEST_EXAMPLES = ['The pump is 536 deep underground.', 'The database has 66723107008 records.', 'I received 23 456,9 KGs',  'Variables reported as having a missing type #65678']
+import argparse
+TEST_EXAMPLES = ['0', 'The pump is 536 deep underground.', 'The database has 66723107008 records.', 'I received 23 456,9 KGs',  'Variables reported as having a missing type #65678']
 
 INCREMENTS = [1, 10, 100, 1000, 1000000, 1000000000]
 INCREMENT_EQUIVALENT = ['one', 'ten', 'hundred', 'thousand', 'million', 'billion']
@@ -116,24 +117,29 @@ def split_into_relevant_units_and_compress(number):
         divisor = divisor*10
     return compress_units(split_units_dict)
 
-def main():
+def main(txt_file):
     output = []
-    with open('number_snippets.txt') as file:
+    with open(txt_file) as file:
         for line in file.readlines():
+
             sentence_output = []
             prepend = ''
             parsed_numbers = extract_numbers_from_sentence(line)
             if parsed_numbers:
                 for parsed_number in parsed_numbers:
                     if parsed_number < 0:
-                        prepend = 'minus'
+                        prepend = 'minus '
                         parsed_number = parsed_number*-1
                     unit_split = split_into_relevant_units_and_compress(parsed_number)
-                    complete_sentence = compressed_dict_to_words(unit_split)
-                    output.append(prepend + ' ' + complete_sentence)
+                    complete_sentence = compressed_dict_to_words(unit_split) if parsed_number else 'zero'
+                    output.append(prepend + complete_sentence)
             else:
                 output.append('number invalid')
-        sys.stdout(output)
+        print(output)
+
+number_parser = argparse.ArgumentParser(description='Convert numbers in a sentence to string')
+number_parser.add_argument('txt_file', type=str, help='Text file to read')
+args = number_parser.parse_args()
 
 if __name__== '__main__':
-    main()
+    main(args.txt_file)
